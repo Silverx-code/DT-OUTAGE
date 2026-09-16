@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+frontend/.env.example
+backend/.env.example
 
 # Build outputs and dependencies
 backend/target/

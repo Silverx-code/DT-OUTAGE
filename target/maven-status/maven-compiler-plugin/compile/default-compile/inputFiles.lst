@@ -25,16 +25,15 @@ C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dt
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\repository\FaultCategoryRepository.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\repository\OutageAuditLogRepository.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\repository\UserRepository.java
-C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\service\AccessRequestService.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\service\CurrentUserService.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\service\DashboardService.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\service\DtOutageService.java
-C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\AccessRequestController.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\DashboardController.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\DtMasterController.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\dto\AccessRequestResponse.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\dto\AgeingBucketResponse.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\dto\ChallengeCategoryResponse.java
+C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\dto\CreateUserRequest.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\dto\DashboardSummaryResponse.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\dto\DecideAccessRequestRequest.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\dto\DtMasterResponse.java
@@ -47,3 +46,4 @@ C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dt
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\DtOutageController.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\LookupController.java
 C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\MeController.java
+C:\Users\SILVER\Documents\dt-outage-system\backend\src\main\java\com\gridline\dtoutage\web\UserController.java

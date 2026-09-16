@@ -13,6 +13,7 @@ com\gridline\dtoutage\repository\FaultCategoryRepository.class
 com\gridline\dtoutage\web\dto\DashboardSummaryResponse.class
 com\gridline\dtoutage\web\DtMasterController.class
 com\gridline\dtoutage\exception\ResourceNotFoundException.class
+com\gridline\dtoutage\web\dto\CreateUserRequest.class
 com\gridline\dtoutage\domain\DtMaster.class
 com\gridline\dtoutage\domain\User$UserBuilder.class
 com\gridline\dtoutage\web\dto\DtOutageResponse.class
@@ -29,7 +30,6 @@ com\gridline\dtoutage\domain\AccessRequestStatus.class
 com\gridline\dtoutage\exception\InvalidRestorationException.class
 com\gridline\dtoutage\domain\ChallengeCategory.class
 com\gridline\dtoutage\config\GridlineJwtAuthenticationConverter.class
-com\gridline\dtoutage\service\AccessRequestService$1.class
 com\gridline\dtoutage\repository\AccessAuditLogRepository.class
 com\gridline\dtoutage\domain\FaultCategory$FaultCategoryBuilder.class
 com\gridline\dtoutage\service\DtOutageService.class
@@ -43,7 +43,6 @@ com\gridline\dtoutage\config\SecurityConfig.class
 com\gridline\dtoutage\domain\AccessRequest.class
 com\gridline\dtoutage\web\dto\UserSummaryResponse.class
 com\gridline\dtoutage\web\DashboardController.class
-com\gridline\dtoutage\service\AccessRequestService.class
 com\gridline\dtoutage\domain\DtOutage.class
 com\gridline\dtoutage\web\dto\AccessRequestResponse.class
 com\gridline\dtoutage\domain\AccessAuditLog.class
@@ -51,7 +50,7 @@ com\gridline\dtoutage\web\LookupController.class
 com\gridline\dtoutage\web\dto\ChallengeCategoryResponse.class
 com\gridline\dtoutage\domain\OutageAuditLog.class
 com\gridline\dtoutage\repository\DtOutageRepository.class
-com\gridline\dtoutage\web\AccessRequestController.class
+com\gridline\dtoutage\web\UserController.class
 com\gridline\dtoutage\repository\UserRepository.class
 com\gridline\dtoutage\service\DashboardService.class
 com\gridline\dtoutage\repository\DtMasterRepository.class
