@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: dt-outage-reporting
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/dt_outage}
+    username: ${DB_USERNAME:dt_outage_app}
+    password: ${DB_PASSWORD:changeme}
+    hikari:
+      # A conservative default for managed PostgreSQL poolers such as Supabase.
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:5}
+      minimum-idle: ${DB_POOL_MIN_IDLE:0}
+
+  jpa:
+    hibernate:
+      # Flyway owns the schema — Hibernate only validates it matches the
+      # entity mappings, it never auto-generates or alters tables.
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Entra ID (Azure AD) tenant's OIDC discovery endpoint. Spring
+          # pulls the JWKS from here to validate incoming bearer tokens.
+          issuer-uri: ${ENTRA_ISSUER_URI:https://login.microsoftonline.com/<tenant-id>/v2.0}
+
+server:
+  # Render provides PORT; SERVER_PORT remains available for local deployments.
+  port: ${PORT:${SERVER_PORT:8080}}
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.gridline.dtoutage: INFO
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  # Set once at first production deployment to permit the initial UAR approver.
+  # It must be the Entra object ID (the JWT subject), not an email address.
+  bootstrap-superadmin-oid: ${BOOTSTRAP_SUPERADMIN_OID:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

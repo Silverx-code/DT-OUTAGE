@@ -1,0 +1,15 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Build outputs and dependencies
+backend/target/
+frontend/.next/
+frontend/node_modules/
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+Thumbs.db
