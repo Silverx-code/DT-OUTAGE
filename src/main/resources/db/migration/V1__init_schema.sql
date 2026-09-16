@@ -71,7 +71,7 @@ CREATE TABLE dt_outages (
 
     outage_date          DATE NOT NULL,
     outage_time          TIME NOT NULL,
-    outage_datetime       TIMESTAMPTZ GENERATED ALWAYS AS ((outage_date + outage_time)::timestamptz) STORED,
+    outage_datetime       TIMESTAMPTZ NOT NULL,
 
     fault_category_id    INT NOT NULL REFERENCES fault_categories(category_id),
     fault_description    TEXT NOT NULL,
@@ -83,19 +83,10 @@ CREATE TABLE dt_outages (
 
     restoration_date      DATE,
     restoration_time      TIME,
-    restoration_datetime  TIMESTAMPTZ GENERATED ALWAYS AS (
-        CASE WHEN restoration_date IS NOT NULL
-             THEN (restoration_date + restoration_time)::timestamptz END
-    ) STORED,
+    restoration_datetime  TIMESTAMPTZ,
     restoration_remarks   TEXT,
 
-    outage_duration_minutes INT GENERATED ALWAYS AS (
-        CASE WHEN restoration_date IS NOT NULL THEN
-            EXTRACT(EPOCH FROM (
-                (restoration_date + restoration_time) - (outage_date + outage_time)
-            ))::INT / 60
-        END
-    ) STORED,
+    outage_duration_minutes INT,
 
     reported_by           UUID NOT NULL REFERENCES users(user_id),
     reported_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -109,6 +100,37 @@ CREATE TABLE dt_outages (
         CHECK (restoration_date IS NULL OR
                (restoration_date + restoration_time) >= (outage_date + outage_time))
 );
+
+-- PostgreSQL generated columns require immutable expressions. Converting a
+-- date/time pair to timestamptz depends on timezone settings, so maintain the
+-- derived values in a trigger with an explicit UTC interpretation instead.
+CREATE OR REPLACE FUNCTION set_outage_derived_values()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    NEW.outage_datetime := (NEW.outage_date + NEW.outage_time) AT TIME ZONE 'UTC';
+
+    IF NEW.restoration_date IS NOT NULL AND NEW.restoration_time IS NOT NULL THEN
+        NEW.restoration_datetime :=
+            (NEW.restoration_date + NEW.restoration_time) AT TIME ZONE 'UTC';
+        NEW.outage_duration_minutes := EXTRACT(EPOCH FROM (
+            (NEW.restoration_date + NEW.restoration_time)
+            - (NEW.outage_date + NEW.outage_time)
+        ))::INT / 60;
+    ELSE
+        NEW.restoration_datetime := NULL;
+        NEW.outage_duration_minutes := NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_set_outage_derived_values
+    BEFORE INSERT OR UPDATE ON dt_outages
+    FOR EACH ROW
+    EXECUTE FUNCTION set_outage_derived_values();
 
 -- THE critical rule: only one active (status = 'OUT') outage per DT at a time.
 -- Atomic and race-condition-proof — this is what makes the duplicate check

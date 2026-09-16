@@ -64,7 +64,7 @@ public class DtOutage {
     @Column(name = "outage_time", nullable = false)
     private LocalTime outageTime;
 
-    /** Generated column (STORED) — Postgres computes this, Hibernate only reads it. */
+    /** Trigger-maintained derived value; Hibernate only reads it. */
     @Column(name = "outage_datetime", insertable = false, updatable = false)
     private Instant outageDatetime;
 
@@ -92,14 +92,14 @@ public class DtOutage {
     @Column(name = "restoration_time")
     private LocalTime restorationTime;
 
-    /** Generated column (STORED) — null until restoration_date is set. */
+    /** Trigger-maintained derived value; null until restoration_date is set. */
     @Column(name = "restoration_datetime", insertable = false, updatable = false)
     private Instant restorationDatetime;
 
     @Column(name = "restoration_remarks")
     private String restorationRemarks;
 
-    /** Generated column (STORED) — Postgres computes the duration; never set from Java. */
+    /** Trigger-maintained derived value; never set from Java. */
     @Column(name = "outage_duration_minutes", insertable = false, updatable = false)
     private Integer outageDurationMinutes;
 
