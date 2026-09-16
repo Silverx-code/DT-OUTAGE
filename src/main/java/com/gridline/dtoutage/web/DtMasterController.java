@@ -4,12 +4,15 @@ import com.gridline.dtoutage.domain.DtMaster;
 import com.gridline.dtoutage.exception.ResourceNotFoundException;
 import com.gridline.dtoutage.repository.DtMasterRepository;
 import com.gridline.dtoutage.web.dto.DtMasterResponse;
+import com.gridline.dtoutage.web.dto.DtMasterRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
 
 @RestController
 @RequestMapping("/dt-master")
@@ -22,8 +25,7 @@ public class DtMasterController {
     @GetMapping("/search")
     @PreAuthorize("hasRole('USER')")
     public List<DtMasterResponse> search(@RequestParam String q) {
-        return dtMasterRepository
-                .findTop20ByActiveTrueAndDtCodeContainingIgnoreCaseOrActiveTrueAndDtNameContainingIgnoreCase(q, q)
+        return dtMasterRepository.searchActive(q, PageRequest.of(0, 20))
                 .stream()
                 .map(DtMasterResponse::from)
                 .toList();
@@ -37,26 +39,38 @@ public class DtMasterController {
                 .orElseThrow(() -> new ResourceNotFoundException("DT not found: " + dtId));
     }
 
+    @GetMapping("/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<DtMasterResponse> allForAdmin() {
+        return dtMasterRepository.findAllByOrderByDtCodeAsc().stream()
+                .map(DtMasterResponse::from).toList();
+    }
+
     // DT Master is immutable to normal users by design (Section 7 of the
     // design doc) — only SuperAdmin can create/edit entries.
     @PostMapping
-    @PreAuthorize("hasRole('SUPERADMIN')")
-    public DtMasterResponse create(@RequestBody DtMaster dtMaster) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public DtMasterResponse create(@Valid @RequestBody DtMasterRequest request) {
+        DtMaster dtMaster = DtMaster.builder()
+                .dtCode(request.dtCode()).dtName(request.dtName()).businessUnit(request.businessUnit())
+                .undertaking(request.undertaking()).feeder(request.feeder()).capacityKva(request.capacityKva())
+                .supplyBand(request.supplyBand()).active(request.active() == null || request.active()).build();
         return DtMasterResponse.from(dtMasterRepository.save(dtMaster));
     }
 
     @PutMapping("/{dtId}")
-    @PreAuthorize("hasRole('SUPERADMIN')")
-    public DtMasterResponse update(@PathVariable UUID dtId, @RequestBody DtMaster updated) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public DtMasterResponse update(@PathVariable UUID dtId, @Valid @RequestBody DtMasterRequest updated) {
         DtMaster existing = dtMasterRepository.findById(dtId)
                 .orElseThrow(() -> new ResourceNotFoundException("DT not found: " + dtId));
-        existing.setDtName(updated.getDtName());
-        existing.setBusinessUnit(updated.getBusinessUnit());
-        existing.setUndertaking(updated.getUndertaking());
-        existing.setFeeder(updated.getFeeder());
-        existing.setCapacityKva(updated.getCapacityKva());
-        existing.setSupplyBand(updated.getSupplyBand());
-        existing.setActive(updated.isActive());
+        existing.setDtCode(updated.dtCode());
+        existing.setDtName(updated.dtName());
+        existing.setBusinessUnit(updated.businessUnit());
+        existing.setUndertaking(updated.undertaking());
+        existing.setFeeder(updated.feeder());
+        existing.setCapacityKva(updated.capacityKva());
+        existing.setSupplyBand(updated.supplyBand());
+        existing.setActive(updated.active() == null || updated.active());
         return DtMasterResponse.from(dtMasterRepository.save(existing));
     }
 }

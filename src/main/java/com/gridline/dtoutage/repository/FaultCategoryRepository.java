@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface FaultCategoryRepository extends JpaRepository<FaultCategory, Integer> {
     List<FaultCategory> findByActiveTrueOrderBySortOrder();
+    List<FaultCategory> findAllByOrderBySortOrderAscCategoryNameAsc();
 }

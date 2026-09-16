@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ChallengeCategoryRepository extends JpaRepository<ChallengeCategory, Integer> {
     List<ChallengeCategory> findByActiveTrueOrderBySortOrder();
+    List<ChallengeCategory> findAllByOrderBySortOrderAscChallengeNameAsc();
 }
