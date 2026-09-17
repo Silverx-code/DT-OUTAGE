@@ -38,7 +38,7 @@ public class UserController {
         boolean isSuperAdmin = authentication.getAuthorities()
                 .contains(new SimpleGrantedAuthority("ROLE_SUPERADMIN"));
 
-        if (!isSuperAdmin && request.role() != Role.USER) {
+        if (!isSuperAdmin && request.role() != Role.USER && request.role() != Role.PAT) {
             throw new AccessDeniedException("Only a SuperAdmin can create Admin or SuperAdmin users.");
         }
         if (userRepository.findByAuthId(request.authId()).isPresent()) {

@@ -22,7 +22,7 @@ public class DashboardController {
      * exists; for now this endpoint trusts the query param.
      */
     @GetMapping("/dashboard/summary")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'PAT')")
     public DashboardSummaryResponse summary(@RequestParam(required = false) String businessUnit) {
         return dashboardService.buildSummary(businessUnit);
     }

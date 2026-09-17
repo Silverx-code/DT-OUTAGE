@@ -24,7 +24,7 @@ public class DtOutageController {
     private final DtOutageService outageService;
 
     @GetMapping
-    @PreAuthorize("hasRole('USER')") // USER is the floor of the hierarchy — everyone authenticated passes
+    @PreAuthorize("hasAnyRole('USER', 'PAT')")
     public List<DtOutageResponse> list(@RequestParam(required = false) OutageStatus status) {
         List<DtOutage> outages = status == null ? outageService.findAll() : outageService.findByStatus(status);
         return outages.stream().map(DtOutageResponse::from).toList();
