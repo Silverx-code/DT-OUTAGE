@@ -21,6 +21,16 @@ public class DtMasterController {
 
     private final DtMasterRepository dtMasterRepository;
 
+    /** Browse the active transformer master list for all authenticated users. */
+    @GetMapping
+    @PreAuthorize("hasRole('USER')")
+    public List<DtMasterResponse> allActive() {
+        return dtMasterRepository.findAllByOrderByDtCodeAsc().stream()
+                .filter(DtMaster::isActive)
+                .map(DtMasterResponse::from)
+                .toList();
+    }
+
     /** Typeahead search backing the "Search DT by code, street or feeder" field on Report Outage. */
     @GetMapping("/search")
     @PreAuthorize("hasRole('USER')")
