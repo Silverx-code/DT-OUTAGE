@@ -41,15 +41,11 @@ public class UserController {
         if (!isSuperAdmin && request.role() != Role.USER && request.role() != Role.PAT) {
             throw new AccessDeniedException("Only a SuperAdmin can create Admin or SuperAdmin users.");
         }
-        if (userRepository.findByAuthId(request.authId()).isPresent()) {
-            throw new IllegalArgumentException("A user with this Entra Object ID already exists.");
-        }
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        if (userRepository.findByEmailIgnoreCase(request.email()).isPresent()) {
             throw new IllegalArgumentException("A user with this email already exists.");
         }
 
         User user = userRepository.save(User.builder()
-                .authId(request.authId())
                 .fullName(request.fullName())
                 .email(request.email())
                 .role(request.role())

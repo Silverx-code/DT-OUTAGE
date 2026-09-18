@@ -25,7 +25,7 @@ CREATE INDEX idx_dt_master_search ON dt_master (dt_code, dt_name, business_unit,
 -- ---------------------------------------------------------------------
 CREATE TABLE users (
     user_id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    auth_id         VARCHAR(200) UNIQUE NOT NULL,  -- Entra ID `oid` claim
+    auth_id         VARCHAR(200) UNIQUE,  -- Entra ID `oid`, bound on first sign-in
     full_name       VARCHAR(150) NOT NULL,
     email           VARCHAR(200) UNIQUE NOT NULL,
     role            VARCHAR(20) NOT NULL DEFAULT 'USER'

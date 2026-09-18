@@ -28,7 +28,7 @@ public class User {
     private UUID userId;
 
     /** The Entra ID `oid` (object id) claim — the durable identity link. */
-    @Column(name = "auth_id", nullable = false, unique = true)
+    @Column(name = "auth_id", unique = true)
     private String authId;
 
     @Column(name = "full_name", nullable = false)

@@ -32,9 +32,16 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
         String authId = firstPresent(jwt.getClaimAsString("oid"), jwt.getSubject());
         User user = findUser(jwt, authId);
 
+        // Email-only invitations are linked on the first successful Entra
+        // sign-in. The oid comes from the signed JWT and is then used for all
+        // later requests. Never re-bind a row that already has an oid.
+        if (user == null) {
+            user = bindPendingUser(jwt, authId);
+        }
+
         // The configured bootstrap identity is the one exception to the
         // Admin-created-user rule and becomes the first SuperAdmin.
-        if (user == null && authId.equals(bootstrapSuperAdminOid)) {
+        if (user == null && authId != null && authId.equals(bootstrapSuperAdminOid)) {
             String email = firstPresent(jwt.getClaimAsString("preferred_username"),
                     jwt.getClaimAsString("email"), jwt.getClaimAsString("upn"));
             if (email == null) {
@@ -47,7 +54,7 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
                     .role(Role.SUPERADMIN)
                     .active(true)
                     .build());
-        } else if (user != null && authId.equals(bootstrapSuperAdminOid) && !user.isActive()) {
+        } else if (user != null && authId != null && authId.equals(bootstrapSuperAdminOid) && !user.isActive()) {
             user.setRole(Role.SUPERADMIN);
             user.setActive(true);
             user = userRepository.save(user);
@@ -67,7 +74,20 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
     }
 
     private User findUser(Jwt jwt, String authId) {
+        if (authId == null) return null;
         return userRepository.findByAuthId(authId)
                 .orElseGet(() -> userRepository.findByAuthId(jwt.getSubject()).orElse(null));
+    }
+
+    private User bindPendingUser(Jwt jwt, String authId) {
+        String email = firstPresent(jwt.getClaimAsString("preferred_username"),
+                jwt.getClaimAsString("email"), jwt.getClaimAsString("upn"));
+        if (email == null || authId == null) return null;
+
+        User pending = userRepository.findByEmailIgnoreCase(email).orElse(null);
+        if (pending == null || pending.getAuthId() != null) return null;
+
+        pending.setAuthId(authId);
+        return userRepository.save(pending);
     }
 }
