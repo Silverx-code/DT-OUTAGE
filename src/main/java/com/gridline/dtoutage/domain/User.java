@@ -27,6 +27,10 @@ public class User {
     @Column(name = "user_id", updatable = false, nullable = false)
     private UUID userId;
 
+    /** The Entra tenant (`tid`) in which the oid is unique. */
+    @Column(name = "tenant_id", length = 36)
+    private String tenantId;
+
     /** The Entra ID `oid` (object id) claim — the durable identity link. */
     @Column(name = "auth_id", unique = true)
     private String authId;

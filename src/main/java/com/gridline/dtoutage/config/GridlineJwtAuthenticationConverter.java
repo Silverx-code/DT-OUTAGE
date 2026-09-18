@@ -30,7 +30,8 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
     @Transactional
     public AbstractAuthenticationToken convert(Jwt jwt) {
         String authId = firstPresent(jwt.getClaimAsString("oid"), jwt.getSubject());
-        User user = findUser(jwt, authId);
+        String tenantId = jwt.getClaimAsString("tid");
+        User user = findUser(jwt, tenantId, authId);
 
         // Email-only invitations are linked on the first successful Entra
         // sign-in. The oid comes from the signed JWT and is then used for all
@@ -48,6 +49,7 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
                 throw new IllegalArgumentException("The bootstrap token must include an email claim.");
             }
             user = userRepository.save(User.builder()
+                    .tenantId(tenantId)
                     .authId(authId)
                     .fullName(firstPresent(jwt.getClaimAsString("name"), email))
                     .email(email)
@@ -73,10 +75,10 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
         return null;
     }
 
-    private User findUser(Jwt jwt, String authId) {
-        if (authId == null) return null;
-        return userRepository.findByAuthId(authId)
-                .orElseGet(() -> userRepository.findByAuthId(jwt.getSubject()).orElse(null));
+    private User findUser(Jwt jwt, String tenantId, String authId) {
+        if (authId == null || tenantId == null) return null;
+        return userRepository.findByTenantIdAndAuthId(tenantId, authId)
+                .orElseGet(() -> userRepository.findByTenantIdAndAuthId(tenantId, jwt.getSubject()).orElse(null));
     }
 
     private User bindPendingUser(Jwt jwt, String authId) {
@@ -88,6 +90,7 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
         if (pending == null || pending.getAuthId() != null) return null;
 
         pending.setAuthId(authId);
+        pending.setTenantId(jwt.getClaimAsString("tid"));
         return userRepository.save(pending);
     }
 }

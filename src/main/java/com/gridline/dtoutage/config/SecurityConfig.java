@@ -9,12 +9,21 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +35,49 @@ public class SecurityConfig {
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
+
+    @Value("${app.security.api-audience}")
+    private String apiAudience;
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder decoder = NimbusJwtDecoder
+                .withJwkSetUri("https://login.microsoftonline.com/organizations/discovery/v2.0/keys")
+                .build();
+
+        OAuth2TokenValidator<Jwt> defaults = JwtValidators.createDefault();
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(defaults,
+                this::validateEntraIssuer,
+                this::validateAudience));
+        return decoder;
+    }
+
+    private OAuth2TokenValidatorResult validateEntraIssuer(Jwt jwt) {
+        String tenantId = jwt.getClaimAsString("tid");
+        String issuer = jwt.getIssuer() == null ? null : jwt.getIssuer().toString();
+        boolean validTenant = tenantId != null && isGuid(tenantId);
+        boolean validIssuer = issuer != null
+                && issuer.equals("https://login.microsoftonline.com/" + tenantId + "/v2.0");
+        return validTenant && validIssuer
+                ? OAuth2TokenValidatorResult.success()
+                : OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "Invalid Entra tenant issuer.", null));
+    }
+
+    private OAuth2TokenValidatorResult validateAudience(Jwt jwt) {
+        List<String> audiences = jwt.getAudience();
+        return audiences != null && audiences.stream().anyMatch(apiAudience::equals)
+                ? OAuth2TokenValidatorResult.success()
+                : OAuth2TokenValidatorResult.failure(new OAuth2Error("invalid_token", "Token audience is not this API.", null));
+    }
+
+    private boolean isGuid(String value) {
+        try {
+            UUID.fromString(value);
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

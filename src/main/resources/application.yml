@@ -29,9 +29,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # Entra ID (Azure AD) tenant's OIDC discovery endpoint. Spring
-          # pulls the JWKS from here to validate incoming bearer tokens.
-          issuer-uri: ${ENTRA_ISSUER_URI:https://login.microsoftonline.com/<tenant-id>/v2.0}
+          # JwtDecoder is configured in SecurityConfig so issuer validation
+          # can safely support all organizational Entra tenants.
 
 server:
   # Render provides PORT; SERVER_PORT remains available for local deployments.
@@ -45,6 +44,8 @@ logging:
     com.gridline.dtoutage: INFO
 
 app:
+  security:
+    api-audience: ${ENTRA_API_AUDIENCE:fb397327-201c-4133-80e5-2ddd58af33d9}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
   # Set once at first production deployment to bootstrap the initial SuperAdmin.

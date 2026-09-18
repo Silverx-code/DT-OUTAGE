@@ -30,8 +30,9 @@ public class CurrentUserService {
     public User getOrCreateCurrentUser() {
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String authId = firstPresent(jwt.getClaimAsString("oid"), jwt.getSubject());
-        return userRepository.findByAuthId(authId)
-                .or(() -> userRepository.findByAuthId(jwt.getSubject()))
+        String tenantId = jwt.getClaimAsString("tid");
+        return userRepository.findByTenantIdAndAuthId(tenantId, authId)
+                .or(() -> userRepository.findByTenantIdAndAuthId(tenantId, jwt.getSubject()))
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No local user row for authenticated Entra object ID " + authId
                                 + " — this should not happen if GridlineJwtAuthenticationConverter ran."));
