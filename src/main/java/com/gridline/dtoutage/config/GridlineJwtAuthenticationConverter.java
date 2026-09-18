@@ -29,24 +29,25 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
     @Override
     @Transactional
     public AbstractAuthenticationToken convert(Jwt jwt) {
-        User user = userRepository.findByAuthId(jwt.getSubject()).orElse(null);
+        String authId = firstPresent(jwt.getClaimAsString("oid"), jwt.getSubject());
+        User user = findUser(jwt, authId);
 
         // The configured bootstrap identity is the one exception to the
         // Admin-created-user rule and becomes the first SuperAdmin.
-        if (user == null && jwt.getSubject().equals(bootstrapSuperAdminOid)) {
+        if (user == null && authId.equals(bootstrapSuperAdminOid)) {
             String email = firstPresent(jwt.getClaimAsString("preferred_username"),
                     jwt.getClaimAsString("email"), jwt.getClaimAsString("upn"));
             if (email == null) {
                 throw new IllegalArgumentException("The bootstrap token must include an email claim.");
             }
             user = userRepository.save(User.builder()
-                    .authId(jwt.getSubject())
+                    .authId(authId)
                     .fullName(firstPresent(jwt.getClaimAsString("name"), email))
                     .email(email)
                     .role(Role.SUPERADMIN)
                     .active(true)
                     .build());
-        } else if (user != null && jwt.getSubject().equals(bootstrapSuperAdminOid) && !user.isActive()) {
+        } else if (user != null && authId.equals(bootstrapSuperAdminOid) && !user.isActive()) {
             user.setRole(Role.SUPERADMIN);
             user.setActive(true);
             user = userRepository.save(user);
@@ -55,7 +56,7 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
         List<GrantedAuthority> authorities = user != null && user.isActive()
                 ? List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
                 : List.of();
-        return new JwtAuthenticationToken(jwt, authorities, user != null ? user.getEmail() : jwt.getSubject());
+        return new JwtAuthenticationToken(jwt, authorities, user != null ? user.getEmail() : authId);
     }
 
     private String firstPresent(String... values) {
@@ -63,5 +64,10 @@ public class GridlineJwtAuthenticationConverter implements Converter<Jwt, Abstra
             if (value != null && !value.isBlank()) return value;
         }
         return null;
+    }
+
+    private User findUser(Jwt jwt, String authId) {
+        return userRepository.findByAuthId(authId)
+                .orElseGet(() -> userRepository.findByAuthId(jwt.getSubject()).orElse(null));
     }
 }
