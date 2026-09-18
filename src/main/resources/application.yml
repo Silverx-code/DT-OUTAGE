@@ -25,13 +25,6 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # JwtDecoder is configured in SecurityConfig so issuer validation
-          # can safely support all organizational Entra tenants.
-
 server:
   # Render provides PORT; SERVER_PORT remains available for local deployments.
   port: ${PORT:${SERVER_PORT:8080}}
