@@ -42,7 +42,9 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder decoder = NimbusJwtDecoder
-                .withJwkSetUri("https://login.microsoftonline.com/organizations/discovery/v2.0/keys")
+                // DEMO ONLY: common also trusts personal Microsoft accounts.
+                // Revert to /organizations before production deployment.
+                .withJwkSetUri("https://login.microsoftonline.com/common/discovery/v2.0/keys")
                 .build();
 
         OAuth2TokenValidator<Jwt> defaults = JwtValidators.createDefault();
