@@ -19,7 +19,8 @@ public class DeploymentCheckController {
     public Map<String, String> check() {
         return Map.of(
                 "status", "ok",
-                "marker", "gridline-backend-deploy-check-20260919-v1"
+                "marker", "gridline-backend-deploy-check-20260919-v2",
+                "meRoute", "enabled"
         );
     }
 
