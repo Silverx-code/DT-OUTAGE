@@ -17,7 +17,7 @@ import java.util.*;
 @Service @RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository users; private final PasswordResetTokenRepository tokens; private final PasswordEncoder encoder;
-    private final JwtEncoder jwtEncoder; private final EmailService emailService;
+    private final JwtEncoder jwtEncoder;
     @Value("${app.security.jwt-expiry-minutes:480}") private long jwtMinutes;
     @Transactional public AuthResponse login(LoginRequest request) {
         User user = users.findByEmailIgnoreCase(request.email().trim()).orElseThrow(() -> new BadCredentialsException("Invalid email or password."));
@@ -28,16 +28,17 @@ public class AuthenticationService {
         users.findByEmailIgnoreCase(email.trim()).filter(User::isActive).ifPresent(user -> { try {
             tokens.deleteByUser_UserId(user.getUserId()); String raw = randomToken();
             tokens.save(PasswordResetToken.builder().tokenHash(hash(raw)).user(user).expiresAt(Instant.now().plus(Duration.ofMinutes(30))).build());
-            emailService.sendReset(user.getEmail(), user.getFullName(), raw);
         } catch (RuntimeException ignored) { /* keep the response indistinguishable */ } });
     }
     @Transactional public void reset(ResetPasswordRequest request) {
         PasswordResetToken token = tokens.findByTokenHash(hash(request.token())).filter(t -> t.getUsedAt() == null && t.getExpiresAt().isAfter(Instant.now())).orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset link."));
         validatePassword(request.password()); User user = token.getUser(); user.setPasswordHash(encoder.encode(request.password())); user.setPasswordChangedAt(Instant.now()); user.setForcePasswordChange(false); users.save(user); token.setUsedAt(Instant.now()); tokens.save(token);
     }
-    public void adminReset(UUID userId) {
+    public String adminReset(UUID userId) {
         User user = users.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found."));
-        requestReset(user.getEmail());
+        tokens.deleteByUser_UserId(user.getUserId()); String raw = randomToken();
+        tokens.save(PasswordResetToken.builder().tokenHash(hash(raw)).user(user).expiresAt(Instant.now().plus(Duration.ofMinutes(30))).build());
+        return raw;
     }
     public void validatePassword(String password) {
         if (password == null || password.length() < 8 || password.length() > 128 || password.chars().noneMatch(Character::isUpperCase) || password.chars().noneMatch(Character::isLowerCase) || password.chars().noneMatch(Character::isDigit)) throw new IllegalArgumentException("Password must be 8-128 characters and include upper, lower, and numeric characters.");

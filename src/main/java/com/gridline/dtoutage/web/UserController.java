@@ -7,6 +7,7 @@ import com.gridline.dtoutage.repository.UserRepository;
 import com.gridline.dtoutage.service.AuthenticationService;
 import com.gridline.dtoutage.web.dto.CreateUserRequest;
 import com.gridline.dtoutage.web.dto.UserSummaryResponse;
+import com.gridline.dtoutage.web.dto.ResetLinkResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -62,8 +63,9 @@ public class UserController {
 
     @PostMapping("/{userId}/reset-password")
     @PreAuthorize("hasRole('ADMIN')")
-    public void resetPassword(@PathVariable UUID userId) {
-        authenticationService.adminReset(userId);
+    public ResetLinkResponse resetPassword(@PathVariable UUID userId) {
+        String token = authenticationService.adminReset(userId);
+        return new ResetLinkResponse(token, "/reset-password?token=" + token, "30 minutes");
     }
 
     @DeleteMapping("/{userId}")
