@@ -7,9 +7,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Smoke test: the application context should wire up cleanly (entities,
- * repositories, security config, role hierarchy, etc). JwtDecoder is mocked
- * out since there's no real Entra ID tenant reachable in CI.
+ * Smoke test for the application context and local JWT security wiring.
  */
 @SpringBootTest
 @ActiveProfiles("test")

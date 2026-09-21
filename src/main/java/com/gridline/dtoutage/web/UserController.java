@@ -4,6 +4,7 @@ import com.gridline.dtoutage.domain.Role;
 import com.gridline.dtoutage.domain.User;
 import com.gridline.dtoutage.exception.ResourceNotFoundException;
 import com.gridline.dtoutage.repository.UserRepository;
+import com.gridline.dtoutage.service.AuthenticationService;
 import com.gridline.dtoutage.web.dto.CreateUserRequest;
 import com.gridline.dtoutage.web.dto.UserSummaryResponse;
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -56,6 +58,12 @@ public class UserController {
                 .active(true)
                 .build());
         return UserSummaryResponse.from(user);
+    }
+
+    @PostMapping("/{userId}/reset-password")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void resetPassword(@PathVariable UUID userId) {
+        authenticationService.adminReset(userId);
     }
 
     @DeleteMapping("/{userId}")

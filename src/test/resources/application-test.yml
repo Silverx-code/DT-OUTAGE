@@ -9,12 +9,8 @@ spring:
       ddl-auto: none
   flyway:
     enabled: false
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://login.microsoftonline.com/test-tenant/v2.0
-
 app:
   cors:
     allowed-origins: http://localhost:3000
+  security:
+    jwt-secret: test-secret-test-secret-test-secret-test-secret
