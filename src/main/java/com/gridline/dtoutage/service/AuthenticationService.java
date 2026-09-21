@@ -34,6 +34,7 @@ public class AuthenticationService {
         PasswordResetToken token = tokens.findByTokenHash(hash(request.token())).filter(t -> t.getUsedAt() == null && t.getExpiresAt().isAfter(Instant.now())).orElseThrow(() -> new IllegalArgumentException("Invalid or expired reset link."));
         validatePassword(request.password()); User user = token.getUser(); user.setPasswordHash(encoder.encode(request.password())); user.setPasswordChangedAt(Instant.now()); user.setForcePasswordChange(false); users.save(user); token.setUsedAt(Instant.now()); tokens.save(token);
     }
+    @Transactional
     public String adminReset(UUID userId) {
         User user = users.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found."));
         tokens.deleteByUser_UserId(user.getUserId()); String raw = randomToken();
