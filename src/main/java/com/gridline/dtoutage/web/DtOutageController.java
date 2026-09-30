@@ -1,6 +1,5 @@
 package com.gridline.dtoutage.web;
 
-import com.gridline.dtoutage.domain.DtOutage;
 import com.gridline.dtoutage.domain.OutageStatus;
 import com.gridline.dtoutage.service.DtOutageService;
 import com.gridline.dtoutage.web.dto.DtOutageResponse;
@@ -26,8 +25,7 @@ public class DtOutageController {
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'PAT')")
     public List<DtOutageResponse> list(@RequestParam(required = false) OutageStatus status) {
-        List<DtOutage> outages = status == null ? outageService.findAll() : outageService.findByStatus(status);
-        return outages.stream().map(DtOutageResponse::from).toList();
+        return status == null ? outageService.findAllResponses() : outageService.findByStatusResponses(status);
     }
 
     @PostMapping

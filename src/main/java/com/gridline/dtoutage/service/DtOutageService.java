@@ -7,6 +7,7 @@ import com.gridline.dtoutage.exception.ResourceNotFoundException;
 import com.gridline.dtoutage.repository.*;
 import com.gridline.dtoutage.web.dto.ReportOutageRequest;
 import com.gridline.dtoutage.web.dto.RestoreOutageRequest;
+import com.gridline.dtoutage.web.dto.DtOutageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -143,6 +144,17 @@ public class DtOutageService {
 
     public List<DtOutage> findAll() {
         return outageRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DtOutageResponse> findAllResponses() {
+        return outageRepository.findAll().stream().map(DtOutageResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DtOutageResponse> findByStatusResponses(OutageStatus status) {
+        return outageRepository.findByStatusOrderByOutageDateDescOutageTimeDesc(status).stream()
+                .map(DtOutageResponse::from).toList();
     }
 
     private String generateOutageRef() {
