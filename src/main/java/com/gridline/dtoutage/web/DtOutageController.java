@@ -1,5 +1,6 @@
 package com.gridline.dtoutage.web;
 
+import com.gridline.dtoutage.domain.DtOutage;
 import com.gridline.dtoutage.domain.OutageStatus;
 import com.gridline.dtoutage.service.DtOutageService;
 import com.gridline.dtoutage.web.dto.DtOutageResponse;
