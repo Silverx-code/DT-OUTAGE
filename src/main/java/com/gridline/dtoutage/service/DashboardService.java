@@ -8,6 +8,7 @@ import com.gridline.dtoutage.web.dto.DashboardSummaryResponse;
 import com.gridline.dtoutage.web.dto.DtOutageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -24,6 +25,7 @@ public class DashboardService {
 
     private final DtOutageRepository outageRepository;
 
+        @Transactional(readOnly = true)
     public DashboardSummaryResponse buildSummary(String businessUnit) {
         List<DtOutage> active = businessUnit == null
                 ? outageRepository.findByStatusOrderByOutageDateDescOutageTimeDesc(OutageStatus.OUT)
