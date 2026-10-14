@@ -4,6 +4,7 @@ import com.gridline.dtoutage.domain.DtOutage;
 import com.gridline.dtoutage.domain.OutageStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,4 +20,6 @@ public interface DtOutageRepository extends JpaRepository<DtOutage, UUID> {
     boolean existsByDt_DtIdAndStatus(UUID dtId, OutageStatus status);
 
     long countByStatus(OutageStatus status);
+
+    long countByStatusAndRestorationDate(OutageStatus status, LocalDate restorationDate);
 }

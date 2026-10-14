@@ -1,5 +1,7 @@
 package com.gridline.dtoutage.web;
 
+import com.gridline.dtoutage.domain.Role;
+import com.gridline.dtoutage.service.CurrentUserService;
 import com.gridline.dtoutage.service.DashboardService;
 import com.gridline.dtoutage.web.dto.DashboardSummaryResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,17 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final CurrentUserService currentUserService;
 
     /**
-     * businessUnit is optional — Admin/SuperAdmin can omit it for an
-     * org-wide view, while a plain USER's frontend should always pass
-     * their own BU. Enforcing that a USER can't request another BU's
-     * summary belongs in a follow-up pass once BU-scoping middleware
-     * exists; for now this endpoint trusts the query param.
+     * USERs are always scoped to their assigned business unit. PAT users
+     * may optionally request a business-unit filter for reporting.
      */
     @GetMapping("/dashboard/summary")
     @PreAuthorize("hasAnyRole('USER', 'PAT')")
     public DashboardSummaryResponse summary(@RequestParam(required = false) String businessUnit) {
-        return dashboardService.buildSummary(businessUnit);
+        var user = currentUserService.getOrCreateCurrentUser();
+        String effectiveBusinessUnit = user.getRole() == Role.USER
+                ? (user.getBusinessUnit() == null ? "" : user.getBusinessUnit())
+                : businessUnit;
+        return dashboardService.buildSummary(effectiveBusinessUnit);
     }
 }

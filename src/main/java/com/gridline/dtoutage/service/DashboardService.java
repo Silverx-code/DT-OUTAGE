@@ -25,7 +25,7 @@ public class DashboardService {
 
     private final DtOutageRepository outageRepository;
 
-        @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public DashboardSummaryResponse buildSummary(String businessUnit) {
         List<DtOutage> active = businessUnit == null
                 ? outageRepository.findByStatusOrderByOutageDateDescOutageTimeDesc(OutageStatus.OUT)
@@ -38,10 +38,7 @@ public class DashboardService {
                 .toList();
 
         LocalDate today = LocalDate.now();
-        long restoredToday = outageRepository.findByStatusOrderByOutageDateDescOutageTimeDesc(OutageStatus.RESTORED)
-                .stream()
-                .filter(o -> o.getRestorationDate() != null && o.getRestorationDate().isEqual(today))
-                .count();
+        long restoredToday = outageRepository.countByStatusAndRestorationDate(OutageStatus.RESTORED, today);
 
         Map<String, Long> bucketCounts = new LinkedHashMap<>();
         BUCKET_ORDER.forEach(b -> bucketCounts.put(b, 0L));
